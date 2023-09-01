@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:alpine
+    environment:
+      POSTGRES_DB: loan_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - lfg-network
+
+  redis:
+    image: redis:alpine
+    networks:
+      - lfg-network
+
+  web:
+    build: ../lfg-loan-backend
+    command: sh -c "python manage.py makemigrations &&
+                      python manage.py migrate &&
+                      echo \"from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'adminpass')\" | python manage.py shell &&
+                      python manage.py collectstatic --no-input &&
+                      gunicorn core.wsgi:application --bind 0.0.0.0:8000"
+    volumes:
+      - ../lfg-loan-backend:/app
+      - static_volume:/app/static
+    depends_on:
+      - db
+      - redis
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    networks:
+      - lfg-network
+
+  frontend:
+    build: ../lfg-loan-platform
+    ports:
+      - "4200:80"
+    depends_on:
+      - web
+    networks:
+      - lfg-network
+
+  celery:
+    build: ../lfg-loan-backend
+    command: sh -c "celery -A core worker -l info"
+    volumes:
+      - ../lfg-loan-backend:/app
+    depends_on:
+      - db
+      - redis
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    networks:
+      - lfg-network
+
+  nginx:
+    restart: "on-failure"
+    build: ../nginx
+    volumes:
+      - static_volume:/app/static
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+    networks:
+      - lfg-network
+
+volumes:
+  pg_data:
+  static_volume:
+
+networks:
+  lfg-network:
+    driver: bridge

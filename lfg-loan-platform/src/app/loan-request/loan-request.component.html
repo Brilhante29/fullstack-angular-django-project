@@ -1,0 +1,24 @@
+<mat-card>
+  <mat-card-content>
+    <form (ngSubmit)="onLoanRequestSubmit()" fxLayout="column" fxLayoutAlign="center center">
+      <mat-form-field>
+        <mat-label>Nome</mat-label>
+        <input matInput [(ngModel)]="name" name="name" required>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Documento</mat-label>
+        <input matInput [(ngModel)]="document" name="document" required>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Idade</mat-label>
+        <input matInput [(ngModel)]="age" name="age" type="number" required>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Renda</mat-label>
+        <input matInput [(ngModel)]="income" name="income" type="number" required>
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="submit" *ngIf="!isLoading">Solicitar Empréstimo</button>
+      <mat-progress-spinner *ngIf="isLoading" mode="indeterminate"></mat-progress-spinner>
+    </form>
+  </mat-card-content>
+</mat-card>
