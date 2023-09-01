@@ -17,7 +17,7 @@ Este projeto é uma aplicação web desenvolvida utilizando várias tecnologias,
 
 Para rodar o projeto, você precisa ter o Docker e o Docker Compose instalados na sua máquina.
 
-1. Primeiro, navegue até o diretório `docker`.
+1. Primeiro, navegue até o diretório `docker` usando `cd docker`.
 2. Em seguida, execute o seguinte comando para iniciar todos os serviços: `docker-compose up --build`
 
 
